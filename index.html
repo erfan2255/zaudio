@@ -649,8 +649,8 @@
                 <p id="stat-total">0</p>
             </div>
             <div class="stat-box">
-                <h3><i class="fa-solid fa-bars-progress"></i> Progress</h3>
-                <p id="stat-listened" class="stat-highlight">0%</p>
+                <h3><i class="fa-solid fa-bolt"></i> New Tracks</h3>
+                <p id="stat-new" class="stat-highlight">0</p>
             </div>
             <div class="stat-box">
                 <h3><i class="fa-solid fa-heart"></i> Loved</h3>
@@ -759,9 +759,15 @@
     function openStats() {
         if(songs.length === 0) return showToast("No library loaded yet.");
         const total = songs.length;
-        const listenedCount = Object.keys(listenedState).length;
         const favCount = Object.keys(favoritesState).length;
-        const percent = total ? Math.round((listenedCount / total) * 100) : 0;
+        
+        // Calculate new tracks exactly like the "New" filter does
+        let newCount = 0;
+        songs.forEach(song => {
+            const id = generateId(song);
+            const isListened = !!listenedState[id] || song.listened === true;
+            if (song.is_new_arrival && !isListened) newCount++;
+        });
         
         const artistCounts = {};
         songs.forEach(s => {
@@ -772,7 +778,7 @@
             Object.keys(artistCounts).reduce((a, b) => artistCounts[a] > artistCounts[b] ? a : b) : "-";
 
         document.getElementById('stat-total').innerText = total;
-        document.getElementById('stat-listened').innerText = `${percent}%`;
+        document.getElementById('stat-new').innerText = newCount;
         document.getElementById('stat-fav').innerText = favCount;
         document.getElementById('stat-artist').innerText = topArtist;
         document.getElementById('statsModal').style.display = "block";
@@ -821,7 +827,7 @@
     function openYtMusic(artist, title, id) {
         addToHistory(id);
         const query = encodeURIComponent(artist + ' ' + title);
-        const url = `https://music.youtube.com/search?q=${query}`;
+        const url = `https://www.youtube.com/results?search_query=${query}`;
         window.open(url, '_blank');
     }
 

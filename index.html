@@ -660,7 +660,7 @@
     function generateId(song) { return normalizeString(song.artist) + normalizeString(song.title); }
 
     async function init() {
-        const savedTheme = localStorage.getItem('global_radio_theme') || 'dark';
+        const savedTheme = localStorage.getItem('global_radio_theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeIcon(savedTheme);
         setView(currentView);
@@ -1033,4 +1033,3 @@
 </script>
 </body>
 </html>
-

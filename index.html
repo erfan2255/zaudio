@@ -28,6 +28,7 @@
             
             --success: #10b981;
             --love: #ec4899;
+            --fire: #f97316; /* FIXED: Added Fire Color */
             
             --input-bg: rgba(0, 0, 0, 0.3);
             --modal-bg: rgba(0, 0, 0, 0.9);
@@ -490,7 +491,6 @@
                     <option value="newest">📅 Newest</option>
                     <option value="oldest">📅 Oldest</option>
                     <option value="plays_high">🔥 Popularity</option>
-                    <!-- NEW FILTER FOR GLOBAL FAVORITES -->
                     <option value="fav_high">❤️ Most Loved</option>
                 </optgroup>
             </select>
@@ -649,7 +649,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    // FIXED: Imported increment and collection for Global Stats
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================================
@@ -677,7 +676,6 @@
     window.favoritesState = JSON.parse(localStorage.getItem('global_radio_favorites_v20')) || {};
     window.historyList = JSON.parse(localStorage.getItem('global_radio_history_v20')) || []; 
     
-    // NEW: Store Global Favorites
     window.globalFavCounts = {};
 
     const isFirebaseSetup = firebaseConfig.apiKey !== "YOUR_API_KEY";
@@ -688,7 +686,6 @@
         auth = getAuth(app);
         db = getFirestore(app);
 
-        // Listen for user Auth Changes
         onAuthStateChanged(auth, async (user) => {
             window.currentUser = user;
             if (user) {
@@ -712,7 +709,6 @@
             }
         });
 
-        // NEW: Listen for Global Song Stats in Real-time
         const statsRef = collection(db, 'song_stats');
         onSnapshot(statsRef, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
@@ -720,7 +716,6 @@
                 const newCount = change.doc.data().fav_count || 0;
                 window.globalFavCounts[songId] = newCount;
                 
-                // Smooth direct DOM update instead of full render to prevent jumping
                 const card = document.getElementById('card-' + songId);
                 if (card) {
                     const counterEl = card.querySelector('.global-fav-counter');
@@ -731,7 +726,6 @@
                     }
                 }
             });
-            // Initial render fallback if data loads before UI
             if(window.currentFilter === 'all' && window.filteredSongs.length > 0) {
                  window.render(false, true);
             }
@@ -1041,10 +1035,8 @@
         if (isAdding) { window.favoritesState[id] = true; } else { delete window.favoritesState[id]; }
         window.saveDataToCloudOrLocal();
         
-        // NEW: Update Global Stats in Firestore
         if (isFirebaseSetup && window.currentUser) {
             const statDocRef = doc(db, 'song_stats', id);
-            // Increment or Decrement by 1 securely on the server
             setDoc(statDocRef, {
                 fav_count: increment(isAdding ? 1 : -1)
             }, { merge: true }).catch(e => console.error("Global stats error:", e));
@@ -1174,35 +1166,44 @@
 
             const yearFilters = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'];
             if (yearFilters.includes(window.currentFilter)) return song.release_date && song.release_date.startsWith(window.currentFilter);
-            if (window.currentFilter === 'Unk') return !song.release_date || song.release_date === 'Unknown';
+            if (window.currentFilter === 'Unk') return !song.release_date || song.release_date === 'Unknown' || song.release_date === 'Unk';
             return true;
         });
 
-        // FIXED: Added Global Favorites sorting logic
+        // FIXED: Solid logic to throw all Unknown dates to the absolute bottom!
         processed.sort((a, b) => {
-            const dateA = a.release_date || 'Unknown';
-            const dateB = b.release_date || 'Unknown';
-            const unknownA = dateA === 'Unknown';
-            const unknownB = dateB === 'Unknown';
+            const isUnkA = !a.release_date || a.release_date === 'Unknown' || a.release_date === 'Unk';
+            const isUnkB = !b.release_date || b.release_date === 'Unknown' || b.release_date === 'Unk';
+            const dateA = a.release_date || '';
+            const dateB = b.release_date || '';
 
             if (sortType === 'fav_high') {
                 const favA = window.globalFavCounts[window.generateId(a)] || 0;
                 const favB = window.globalFavCounts[window.generateId(b)] || 0;
                 if (favB !== favA) return favB - favA;
-                return dateB.localeCompare(dateA); // fallback
+                // fallback if tie
+                if (isUnkA && !isUnkB) return 1; 
+                if (!isUnkA && isUnkB) return -1;
+                return dateB.localeCompare(dateA); 
             }
 
-            if (sortType === 'newest' || sortType === 'default') {
-                if (unknownA && !unknownB) return 1; if (!unknownA && unknownB) return -1; if (unknownA && unknownB) return 0;
-                return dateB.localeCompare(dateA);
+            if (sortType === 'plays_high') {
+                if (b.plays !== a.plays) return b.plays - a.plays;
+                // fallback if tie
+                if (isUnkA && !isUnkB) return 1; 
+                if (!isUnkA && isUnkB) return -1;
+                return dateB.localeCompare(dateA); 
             }
+
             if (sortType === 'oldest') {
-                if (unknownA && !unknownB) return 1; if (!unknownA && unknownB) return -1; if (unknownA && unknownB) return 0;
+                if (isUnkA && !isUnkB) return 1; 
+                if (!isUnkA && isUnkB) return -1;
                 return dateA.localeCompare(dateB);
             }
-            if (sortType === 'plays_high') return b.plays - a.plays;
-            
-            if (unknownA && !unknownB) return 1; if (!unknownA && unknownB) return -1; if (unknownA && unknownB) return 0;
+
+            // newest & default
+            if (isUnkA && !isUnkB) return 1; 
+            if (!isUnkA && isUnkB) return -1;
             return dateB.localeCompare(dateA);
         });
 
@@ -1219,7 +1220,6 @@
                 const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
                 const imgUrl = song.image || 'https://via.placeholder.com/300x300/1e293b/94a3b8?text=No+Image';
                 
-                // NEW: Get global fav count
                 const globalFavs = window.globalFavCounts[id] || 0;
                 const favDisplay = globalFavs > 0 ? 'inline-block' : 'none';
 
@@ -1260,7 +1260,8 @@
                             <span><i class="fa-regular fa-calendar"></i> ${song.release_date || 'Unk'}</span>
                             <div style="display: flex; gap: 12px; align-items: center;">
                                 <span class="global-fav-counter" title="${globalFavs} users loved this" style="color: var(--love); font-weight: 700; display: ${favDisplay};"><i class="fa-solid fa-heart"></i> ${globalFavs}</span>
-                                <span><i class="fa-solid fa-fire"></i> ${song.plays}</span>
+                                <!-- FIXED: Changed fire icon styling to bold orange -->
+                                <span style="color: var(--fire); font-weight: 700;" title="${song.plays} plays"><i class="fa-solid fa-fire"></i> ${song.plays}</span>
                             </div>
                         </div>
 

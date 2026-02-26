@@ -490,6 +490,8 @@
                     <option value="newest">📅 Newest</option>
                     <option value="oldest">📅 Oldest</option>
                     <option value="plays_high">🔥 Popularity</option>
+                    <!-- NEW FILTER FOR GLOBAL FAVORITES -->
+                    <option value="fav_high">❤️ Most Loved</option>
                 </optgroup>
             </select>
         </div>
@@ -522,7 +524,6 @@
     <div id="grid" class="grid"></div>
     <div id="count-display" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;"></div>
     
-    <!-- INFINITE SCROLL SENTINEL -->
     <div id="scroll-sentinel" style="height: 10px; width: 100%; margin-top: 20px;"></div>
     
     <div class="site-footer">
@@ -536,38 +537,28 @@
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <span class="close" onclick="window.closeModal('loginModal')">&times;</span>
         
-        <!-- LOGIN VIEW -->
         <div id="loginView">
             <h2><i class="fa-solid fa-right-to-bracket"></i> Login</h2>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Welcome back! Login to sync your music.</p>
-            
             <form onsubmit="event.preventDefault(); window.handleLogin();" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="email" id="loginEmail" name="email" autocomplete="email" class="custom-input" placeholder="Email Address" required>
                 <input type="password" id="loginPassword" name="password" autocomplete="current-password" class="custom-input" placeholder="Password" required>
-                <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">
-                    Login
-                </button>
+                <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">Login</button>
             </form>
-            
             <p style="margin-top: 25px; font-size: 0.9rem; color: var(--text-muted);">
                 New here? <a href="javascript:void(0)" onclick="window.toggleAuthView('register')" style="color: var(--accent); text-decoration: none; font-weight: bold;">Register an account</a>
             </p>
         </div>
 
-        <!-- REGISTER VIEW -->
         <div id="registerView" style="display: none;">
             <h2><i class="fa-solid fa-user-plus"></i> Register</h2>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Create an account to save tracks safely in the Cloud.</p>
-            
             <form onsubmit="event.preventDefault(); window.handleRegister();" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="text" id="regName" name="name" autocomplete="name" class="custom-input" placeholder="Your Name" required minlength="2">
                 <input type="email" id="regEmail" name="email" autocomplete="email" class="custom-input" placeholder="Email Address" required>
                 <input type="password" id="regPassword" name="password" autocomplete="new-password" class="custom-input" placeholder="Password (min 6 characters)" required minlength="6">
-                <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">
-                    Register
-                </button>
+                <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">Register</button>
             </form>
-            
             <p style="margin-top: 25px; font-size: 0.9rem; color: var(--text-muted);">
                 Already have an account? <a href="javascript:void(0)" onclick="window.toggleAuthView('login')" style="color: var(--accent); text-decoration: none; font-weight: bold;">Login here</a>
             </p>
@@ -583,7 +574,6 @@
         <h2><i class="fa-solid fa-user-check" style="color: var(--success);"></i> Account</h2>
         <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; margin-top: 15px;">Welcome, <strong id="displayEmail" style="color: var(--text); font-size: 1.1rem;"></strong>!</p>
         
-        <!-- Change Password Section -->
         <div id="changePasswordSection" style="display: none; margin-bottom: 20px; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; border: 1px solid var(--card-border);">
             <form onsubmit="event.preventDefault(); window.handleChangePassword();" style="display: flex; flex-direction: column; gap: 10px;">
                 <input type="password" id="newPasswordInput" name="new-password" autocomplete="new-password" class="custom-input" placeholder="New Password (min 6 chars)" required minlength="6">
@@ -659,18 +649,19 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // FIXED: Imported increment and collection for Global Stats
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================================
     // 🚨 🚨 🚨 YOUR FIREBASE CONFIGURATION GOES HERE 🚨 🚨 🚨
     // =========================================================================
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyCvaELQv2gzTlNVXtIOggh4gBGQwwN7YaQ",
+        authDomain: "zaudio-db.firebaseapp.com",
+        projectId: "zaudio-db",
+        storageBucket: "zaudio-db.firebasestorage.app",
+        messagingSenderId: "477435795983",
+        appId: "1:477435795983:web:d23e4a1815588fb195e17a"
     };
 
     window.songs = []; 
@@ -685,6 +676,9 @@
     window.listenedState = JSON.parse(localStorage.getItem('global_radio_listened_v20')) || {};
     window.favoritesState = JSON.parse(localStorage.getItem('global_radio_favorites_v20')) || {};
     window.historyList = JSON.parse(localStorage.getItem('global_radio_history_v20')) || []; 
+    
+    // NEW: Store Global Favorites
+    window.globalFavCounts = {};
 
     const isFirebaseSetup = firebaseConfig.apiKey !== "YOUR_API_KEY";
     let app, auth, db;
@@ -694,6 +688,7 @@
         auth = getAuth(app);
         db = getFirestore(app);
 
+        // Listen for user Auth Changes
         onAuthStateChanged(auth, async (user) => {
             window.currentUser = user;
             if (user) {
@@ -714,6 +709,31 @@
                 window.favoritesState = {};
                 window.updateAuthUI();
                 window.render();
+            }
+        });
+
+        // NEW: Listen for Global Song Stats in Real-time
+        const statsRef = collection(db, 'song_stats');
+        onSnapshot(statsRef, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const songId = change.doc.id;
+                const newCount = change.doc.data().fav_count || 0;
+                window.globalFavCounts[songId] = newCount;
+                
+                // Smooth direct DOM update instead of full render to prevent jumping
+                const card = document.getElementById('card-' + songId);
+                if (card) {
+                    const counterEl = card.querySelector('.global-fav-counter');
+                    if (counterEl) {
+                        counterEl.innerHTML = `<i class="fa-solid fa-heart"></i> ${newCount}`;
+                        counterEl.style.display = newCount > 0 ? 'inline-block' : 'none';
+                        counterEl.title = `${newCount} users loved this`;
+                    }
+                }
+            });
+            // Initial render fallback if data loads before UI
+            if(window.currentFilter === 'all' && window.filteredSongs.length > 0) {
+                 window.render(false, true);
             }
         });
     }
@@ -838,8 +858,8 @@
         window.updateThemeIcon(savedTheme);
         window.setView(window.currentView);
         window.updateAuthUI();
-        window.setupShortcuts(); // ⌨️ Initialize keyboard shortcuts
-        window.setupInfiniteScroll(); // 🔄 Initialize infinite scroll
+        window.setupShortcuts(); 
+        window.setupInfiniteScroll(); 
         window.render(); 
         
         try {
@@ -861,16 +881,6 @@
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) event.target.style.display = "none";
         }
-    };
-
-    window.setView = function(mode) {
-        window.currentView = mode;
-        localStorage.setItem('global_radio_view', mode);
-        document.getElementById('btn-grid').className = mode === 'grid' ? 'view-btn active' : 'view-btn';
-        document.getElementById('btn-list').className = mode === 'list' ? 'view-btn active' : 'view-btn';
-        const grid = document.getElementById('grid');
-        if(mode === 'list') grid.classList.add('list-view');
-        else grid.classList.remove('list-view');
     };
 
     window.setupInfiniteScroll = function() {
@@ -902,6 +912,16 @@
                 window.showToast(`⌨️ Switched to ${newMode} view`);
             }
         });
+    };
+
+    window.setView = function(mode) {
+        window.currentView = mode;
+        localStorage.setItem('global_radio_view', mode);
+        document.getElementById('btn-grid').className = mode === 'grid' ? 'view-btn active' : 'view-btn';
+        document.getElementById('btn-list').className = mode === 'list' ? 'view-btn active' : 'view-btn';
+        const grid = document.getElementById('grid');
+        if(mode === 'list') grid.classList.add('list-view');
+        else grid.classList.remove('list-view');
     };
 
     window.loadMore = function() {
@@ -982,7 +1002,6 @@
     };
 
     window.toggleListen = function(id) {
-        // STRICT LOGIN CHECK
         if(!window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
             return;
@@ -1012,14 +1031,24 @@
     window.toggleFavorite = function(id, event) {
         if(event) event.stopPropagation();
         
-        // STRICT LOGIN CHECK
         if(!window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
             return;
         }
 
-        if (window.favoritesState[id]) { delete window.favoritesState[id]; } else { window.favoritesState[id] = true; }
+        const isAdding = !window.favoritesState[id];
+        
+        if (isAdding) { window.favoritesState[id] = true; } else { delete window.favoritesState[id]; }
         window.saveDataToCloudOrLocal();
+        
+        // NEW: Update Global Stats in Firestore
+        if (isFirebaseSetup && window.currentUser) {
+            const statDocRef = doc(db, 'song_stats', id);
+            // Increment or Decrement by 1 securely on the server
+            setDoc(statDocRef, {
+                fav_count: increment(isAdding ? 1 : -1)
+            }, { merge: true }).catch(e => console.error("Global stats error:", e));
+        }
         
         const card = document.getElementById('card-' + id);
         if(card) {
@@ -1149,11 +1178,19 @@
             return true;
         });
 
+        // FIXED: Added Global Favorites sorting logic
         processed.sort((a, b) => {
             const dateA = a.release_date || 'Unknown';
             const dateB = b.release_date || 'Unknown';
             const unknownA = dateA === 'Unknown';
             const unknownB = dateB === 'Unknown';
+
+            if (sortType === 'fav_high') {
+                const favA = window.globalFavCounts[window.generateId(a)] || 0;
+                const favB = window.globalFavCounts[window.generateId(b)] || 0;
+                if (favB !== favA) return favB - favA;
+                return dateB.localeCompare(dateA); // fallback
+            }
 
             if (sortType === 'newest' || sortType === 'default') {
                 if (unknownA && !unknownB) return 1; if (!unknownA && unknownB) return -1; if (unknownA && unknownB) return 0;
@@ -1182,6 +1219,10 @@
                 const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
                 const imgUrl = song.image || 'https://via.placeholder.com/300x300/1e293b/94a3b8?text=No+Image';
                 
+                // NEW: Get global fav count
+                const globalFavs = window.globalFavCounts[id] || 0;
+                const favDisplay = globalFavs > 0 ? 'inline-block' : 'none';
+
                 let sourceHTML = '';
                 if(song.source_badge) {
                     song.source_badge.split(' ').forEach(badge => {
@@ -1217,15 +1258,15 @@
                         
                         <div class="meta">
                             <span><i class="fa-regular fa-calendar"></i> ${song.release_date || 'Unk'}</span>
-                            <span><i class="fa-solid fa-fire"></i> ${song.plays}</span>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span class="global-fav-counter" title="${globalFavs} users loved this" style="color: var(--love); font-weight: 700; display: ${favDisplay};"><i class="fa-solid fa-heart"></i> ${globalFavs}</span>
+                                <span><i class="fa-solid fa-fire"></i> ${song.plays}</span>
+                            </div>
                         </div>
 
                         <div class="actions">
                             <button class="btn-action btn-play" onclick="window.openYtMusic('${song.artist.replace(/'/g, "\\'")}', '${song.title.replace(/'/g, "\\'")}', '${id}')" title="Play"><i class="fa-solid fa-play"></i> <span>Play</span></button>
-                            
-                            <a href="${googleSearchUrl}" 
-                               target="_blank" class="btn-action btn-google" title="Google Search"><i class="fa-brands fa-google"></i></a>
-
+                            <a href="${googleSearchUrl}" target="_blank" class="btn-action btn-google" title="Google Search"><i class="fa-brands fa-google"></i></a>
                             <button class="btn-action btn-listen ${isListened ? 'is-active' : ''}" onclick="window.toggleListen('${id}')" title="Mark Done">
                                 ${listenIcon}
                             </button>
@@ -1234,11 +1275,17 @@
                 `;
                 grid.appendChild(card);
             });
+
+            if(window.visibleCount < processed.length) {
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'load-more-container';
+                btnContainer.innerHTML = `<button class="btn-load-more" onclick="window.loadMore()"><i class="fa-solid fa-circle-arrow-down"></i> Show More</button>`;
+                grid.appendChild(btnContainer);
+            }
         }
         countDisplay.innerText = `Displaying ${Math.min(window.visibleCount, processed.length)} of ${processed.length} tracks`;
     };
 
-    // Run the app!
     window.init();
 </script>
 </body>

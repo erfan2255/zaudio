@@ -218,6 +218,8 @@
             gap: 10px; 
             transition: 0.2s; 
             box-shadow: 0 4px 15px var(--accent-glow);
+            box-sizing: border-box; /* Added to fix mobile thinness */
+            min-height: 48px; /* Added to fix mobile thinness */
         }
         .btn-shuffle:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
         
@@ -325,7 +327,6 @@
 
         .title { font-weight: 700; font-size: 0.95rem; line-height: 1.3; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--text); }
         
-        /* FIXED: Changed artist CSS to prevent full-width hover trigger */
         .artist { 
             display: inline-block; 
             width: fit-content; 
@@ -383,111 +384,27 @@
         .btn-action.is-active { background: var(--success); border-color: var(--success); color: white; }
         .btn-google:hover { color: var(--google-blue); border-color: var(--google-blue); }
 
-        /* --- LIST VIEW STYLES (Mobile Over-flow Fixes) --- */
-        .list-view .card { 
-            flex-direction: row; 
-            align-items: center; 
-            padding: 10px 15px; 
-            height: auto; 
-            min-height: 80px;
-        }
-        
-        .list-view .actions {
-            display: flex;
-            width: auto;
-            margin-top: 0;
-            gap: 8px;
-            flex-shrink: 0; 
-        }
-        
-        .list-view .btn-action {
-            width: 36px; 
-            height: 36px; 
-            padding: 0; 
-            border-radius: 50%; 
-            font-size: 1rem; 
-            flex-grow: 0;
-            justify-content: center;
-        }
-        
-        .list-view .btn-play {
-            width: 36px; 
-            height: 36px; 
-            padding: 0; 
-            border-radius: 50%; 
-            grid-column: auto; 
-        }
+        /* --- LIST VIEW STYLES --- */
+        .list-view .card { flex-direction: row; align-items: center; padding: 10px 15px; height: auto; min-height: 80px; }
+        .list-view .actions { display: flex; width: auto; margin-top: 0; gap: 8px; flex-shrink: 0; }
+        .list-view .btn-action { width: 36px; height: 36px; padding: 0; border-radius: 50%; font-size: 1rem; flex-grow: 0; justify-content: center; }
+        .list-view .btn-play { width: 36px; height: 36px; padding: 0; border-radius: 50%; grid-column: auto; }
         .list-view .btn-play span { display: none; } 
-
-        .list-view .img-container { 
-            width: 50px; 
-            height: 50px; 
-            flex-shrink: 0; 
-            margin-right: 15px; 
-            border-radius: 8px; 
-            overflow: hidden; 
-        }
+        .list-view .img-container { width: 50px; height: 50px; flex-shrink: 0; margin-right: 15px; border-radius: 8px; overflow: hidden; }
         .list-view .card-img { border: none; }
         .list-view .play-overlay { display: none; }
         .list-view .new-badge { top: 2px; right: auto; left: 2px; font-size: 0.4rem; padding: 2px 4px; border-radius: 4px; }
         .list-view .source-container { display: none; }
-        .list-view .fav-icon { 
-            position: static; 
-            opacity: 0.2; 
-            margin-right: 15px; 
-            font-size: 1.2rem; 
-            color: var(--text); 
-            transform: none !important;
-        }
+        .list-view .fav-icon { position: static; opacity: 0.2; margin-right: 15px; font-size: 1.2rem; color: var(--text); transform: none !important; }
         .list-view .card.favorite .fav-icon { opacity: 1; color: var(--love); }
         .list-view .card:hover .fav-icon { opacity: 0.6; }
-        
-        .list-view .card-body { 
-            padding: 0; 
-            flex-direction: row; 
-            align-items: center; 
-            justify-content: space-between; 
-            width: 100%; 
-            border: none; 
-            gap: 10px;
-            min-width: 0; 
-        }
-        .list-view .info-col { 
-            display: flex; 
-            flex-direction: column; 
-            flex-grow: 1; 
-            min-width: 0; 
-            margin-right: 5px;
-            align-items: flex-start; /* Ensures content aligns properly */
-        }
-        .list-view .title { 
-            font-size: 1rem; 
-            margin-bottom: 2px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            display: block; 
-            width: 100%;
-        }
-        
-        .list-view .meta { 
-            margin: 0; 
-            padding: 0; 
-            border: none; 
-            width: auto; 
-            min-width: 80px;
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-end; 
-            font-size: 0.8rem; 
-            margin-right: 15px; 
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
+        .list-view .card-body { padding: 0; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; border: none; gap: 10px; min-width: 0; }
+        .list-view .info-col { display: flex; flex-direction: column; flex-grow: 1; min-width: 0; margin-right: 5px; align-items: flex-start; }
+        .list-view .title { font-size: 1rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+        .list-view .meta { margin: 0; padding: 0; border: none; width: auto; min-width: 80px; display: flex; flex-direction: column; align-items: flex-end; font-size: 0.8rem; margin-right: 15px; color: var(--text-muted); flex-shrink: 0; }
 
         @media (max-width: 768px) { 
             .list-view .meta { display: none; } 
-            
             .list-view .card { padding: 8px 10px; }
             .list-view .img-container { width: 45px; height: 45px; margin-right: 10px; }
             .list-view .fav-icon { margin-right: 10px; font-size: 1.1rem; }
@@ -496,7 +413,6 @@
             .list-view .btn-play { width: 32px; height: 32px; }
             .list-view .title { font-size: 0.95rem; }
             .list-view .artist { font-size: 0.8rem; }
-            
             .header h1 { font-size: 1.3rem; }
             .header-actions { gap: 8px; }
             .controls-area { gap: 10px; padding: 15px; }
@@ -513,46 +429,13 @@
 
         /* --- MODALS --- */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: var(--modal-bg); backdrop-filter: blur(5px); }
-        
-        .modal-content { 
-            box-sizing: border-box;
-            border-radius: 20px; 
-            border: 1px solid var(--card-border); 
-            background: var(--card-bg); 
-            backdrop-filter: blur(16px);
-            color: var(--text);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
-            margin: 15vh auto; 
-            padding: 25px; 
-            width: 90%; 
-            max-width: 500px; 
-            position: relative;
-            animation: modalPop 0.3s ease-out forwards;
-        }
-        
-        @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal h2 { margin-top: 0; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .modal-content { box-sizing: border-box; border-radius: 20px; border: 1px solid var(--card-border); background: var(--card-bg); backdrop-filter: blur(16px); color: var(--text); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); margin: 15vh auto; padding: 25px; width: 90%; max-width: 500px; position: relative; animation: modalPop 0.3s ease-out forwards; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal h2 { margin-top: 0; font-weight: 700; display: flex; align-items: center; gap: 12px; justify-content: center; }
         .close { color: var(--text-muted); float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close:hover { color: var(--text); }
         
-        /* Custom Inputs for Modals */
-        .custom-input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
-            background: var(--input-bg);
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            box-sizing: border-box;
-            transition: 0.2s;
-            outline: none;
-        }
+        .custom-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text); font-size: 1rem; font-family: inherit; box-sizing: border-box; transition: 0.2s; outline: none; }
         .custom-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
         .stat-box { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 15px; transition: 0.2s; }
@@ -560,23 +443,7 @@
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
 
         .data-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-
-        .data-btn { 
-            padding: 18px; 
-            border-radius: 12px; 
-            font-weight: 600; 
-            border: 1px solid var(--card-border); 
-            background: var(--btn-bg); 
-            color: var(--text);
-            transition: all 0.2s;
-            cursor: pointer;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+        .data-btn { padding: 15px; border-radius: 12px; font-weight: 600; border: 1px solid var(--card-border); background: var(--btn-bg); color: var(--text); transition: all 0.2s; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-size: 0.9rem;}
         .data-btn i { font-size: 1.5rem; width: auto; margin-bottom: 5px; }
         .data-btn:hover { background: var(--card-bg); transform: scale(1.02); border-color: var(--accent); }
         .data-btn.danger { border-color: var(--yt-red); color: var(--yt-red); grid-column: span 2;}
@@ -590,7 +457,6 @@
         .empty-state { grid-column: 1/-1; text-align: center; padding: 50px; color: var(--text-muted); border: 2px dashed var(--card-border); background: rgba(0,0,0,0.1); border-radius: 20px; margin-top: 20px;}
         .empty-state i { font-size: 3rem; margin-bottom: 20px; opacity: 0.5; }
 
-        /* --- FOOTER --- */
         .site-footer { text-align: center; margin-top: 15px; padding-bottom: 15px; color: var(--text-muted); }
         .site-footer .made-with { font-size: 0.8rem; margin-bottom: 5px; }
         .site-footer .copyright { font-size: 0.7rem; opacity: 0.6; font-family: sans-serif; letter-spacing: 0.5px; }
@@ -604,7 +470,6 @@
         <div class="header-actions">
             <!-- Login Button -->
             <button class="theme-btn" onclick="window.handleAuthClick()" id="loginBtn" title="Account"><i class="fa-solid fa-user"></i></button>
-            
             <button class="theme-btn" onclick="window.openStats()" title="View Stats"><i class="fa-solid fa-chart-pie"></i></button>
             <button class="theme-btn" onclick="window.openDataModal()" title="Data"><i class="fa-solid fa-database"></i></button>
             <button class="theme-btn" onclick="window.toggleTheme()" id="themeIcon"><i class="fa-solid fa-moon"></i></button>
@@ -643,9 +508,7 @@
         <button class="tab fav-tab" onclick="window.setFilter('favorites')" id="tab-favorites"><i class="fa-solid fa-heart"></i> Favorites</button>
         <button class="tab" onclick="window.setFilter('listened')" id="tab-listened"><i class="fa-solid fa-circle-check"></i> Done</button>
         <button class="tab" onclick="window.setFilter('all')" id="tab-all"><i class="fa-solid fa-layer-group"></i> Library</button>
-        
         <div style="width:1px; background:var(--card-border); margin:0 10px;"></div>
-        
         <button class="tab" onclick="window.setFilter('2026')" id="tab-2026">2026</button>
         <button class="tab" onclick="window.setFilter('2025')" id="tab-2025">2025</button>
         <button class="tab" onclick="window.setFilter('2024')" id="tab-2024">2024</button>
@@ -660,27 +523,54 @@
     <div id="grid" class="grid"></div>
     <div id="count-display" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;"></div>
     
-    <!-- COPYRIGHT FOOTER -->
     <div class="site-footer">
         <div class="made-with">made with ❤️</div>
         <div class="copyright">All rights reserved for Erfan shariati</div>
     </div>
 </div>
 
-<!-- LOGIN / REGISTER MODAL -->
+<!-- AUTHENTICATION MODAL (Login / Register Split) -->
 <div id="loginModal" class="modal">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <span class="close" onclick="window.closeModal('loginModal')">&times;</span>
-        <h2><i class="fa-solid fa-user-circle"></i> User Account</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Register or login to save your favorite tracks safely in the Cloud.</p>
         
-        <form onsubmit="event.preventDefault(); window.handleLogin();" style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="email" id="emailInput" class="custom-input" placeholder="Email Address" autocomplete="username" name="email">
-            <input type="password" id="passwordInput" class="custom-input" placeholder="Password (min 6 characters)" autocomplete="current-password" name="password">
-            <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 10px;">
-                <i class="fa-solid fa-right-to-bracket"></i> Login / Register
-            </button>
-        </form>
+        <!-- LOGIN VIEW -->
+        <div id="loginView">
+            <h2><i class="fa-solid fa-right-to-bracket"></i> Login</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Welcome back! Login to sync your music.</p>
+            
+            <form onsubmit="event.preventDefault(); window.handleLogin();" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" id="loginEmail" class="custom-input" placeholder="Email Address" required>
+                <input type="password" id="loginPassword" class="custom-input" placeholder="Password" required>
+                <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">
+                    Login
+                </button>
+            </form>
+            
+            <p style="margin-top: 25px; font-size: 0.9rem; color: var(--text-muted);">
+                New here? <a href="javascript:void(0)" onclick="window.toggleAuthView('register')" style="color: var(--accent); text-decoration: none; font-weight: bold;">Register an account</a>
+            </p>
+        </div>
+
+        <!-- REGISTER VIEW -->
+        <div id="registerView" style="display: none;">
+            <h2><i class="fa-solid fa-user-plus"></i> Register</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Create an account to save tracks safely in the Cloud.</p>
+            
+            <form onsubmit="event.preventDefault(); window.handleRegister();" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="regName" class="custom-input" placeholder="Your Name" required minlength="2">
+                <input type="email" id="regEmail" class="custom-input" placeholder="Email Address" required>
+                <input type="password" id="regPassword" class="custom-input" placeholder="Password (min 6 characters)" required minlength="6">
+                <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">
+                    Register
+                </button>
+            </form>
+            
+            <p style="margin-top: 25px; font-size: 0.9rem; color: var(--text-muted);">
+                Already have an account? <a href="javascript:void(0)" onclick="window.toggleAuthView('login')" style="color: var(--accent); text-decoration: none; font-weight: bold;">Login here</a>
+            </p>
+        </div>
+
     </div>
 </div>
 
@@ -688,12 +578,28 @@
 <div id="accountModal" class="modal">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <span class="close" onclick="window.closeModal('accountModal')">&times;</span>
-        <h2><i class="fa-solid fa-user-check" style="color: var(--success);"></i> Logged In</h2>
-        <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; margin-top: 15px;">Welcome back, <strong id="displayEmail" style="color: var(--text); font-size: 1.1rem;"></strong>!</p>
+        <h2><i class="fa-solid fa-user-check" style="color: var(--success);"></i> Account</h2>
+        <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; margin-top: 15px;">Welcome, <strong id="displayEmail" style="color: var(--text); font-size: 1.1rem;"></strong>!</p>
         
-        <button class="data-btn danger" style="width: 100%; flex-direction: row;" onclick="window.handleLogout()">
-            <i class="fa-solid fa-right-from-bracket" style="margin: 0;"></i> <span>Logout</span>
-        </button>
+        <!-- Change Password Section (Hidden by default) -->
+        <div id="changePasswordSection" style="display: none; margin-bottom: 20px; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; border: 1px solid var(--card-border);">
+            <form onsubmit="event.preventDefault(); window.handleChangePassword();" style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="password" id="newPasswordInput" class="custom-input" placeholder="New Password (min 6 chars)" required minlength="6">
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="data-btn" style="flex: 1; padding: 10px;" onclick="document.getElementById('changePasswordSection').style.display='none'">Cancel</button>
+                    <button type="submit" class="data-btn" style="flex: 1; padding: 10px; border-color: var(--success); color: var(--success);">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="data-btn" style="width: 100%; flex-direction: row; padding: 15px;" onclick="document.getElementById('changePasswordSection').style.display='block'">
+                <i class="fa-solid fa-key" style="margin: 0;"></i> <span>Change Password</span>
+            </button>
+            <button class="data-btn danger" style="width: 100%; flex-direction: row; padding: 15px;" onclick="window.handleLogout()">
+                <i class="fa-solid fa-right-from-bracket" style="margin: 0;"></i> <span>Logout</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -715,9 +621,10 @@
                 <h3><i class="fa-solid fa-heart"></i> Loved</h3>
                 <p id="stat-fav" class="stat-highlight-fav">0</p>
             </div>
+            <!-- FIXED: Changed from Top Artist to Listened -->
             <div class="stat-box">
-                <h3><i class="fa-solid fa-crown"></i> Top Artist</h3>
-                <p id="stat-artist" style="font-size: 1.1rem; padding-top:5px;">-</p>
+                <h3><i class="fa-solid fa-circle-check"></i> Listened</h3>
+                <p id="stat-listened" style="font-size: 1.5rem; font-weight: 700;">0</p>
             </div>
         </div>
     </div>
@@ -750,19 +657,19 @@
 <!-- 🔴 FIREBASE SDK (MUST BE MODULE) 🔴 -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================================
     // 🚨 🚨 🚨 YOUR FIREBASE CONFIGURATION GOES HERE 🚨 🚨 🚨
     // =========================================================================
     const firebaseConfig = {
-        apiKey: "AIzaSyCvaELQv2gzTlNVXtIOggh4gBGQwwN7YaQ",
-        authDomain: "zaudio-db.firebaseapp.com",
-        projectId: "zaudio-db",
-        storageBucket: "zaudio-db.firebasestorage.app",
-        messagingSenderId: "477435795983",
-        appId: "1:477435795983:web:d23e4a1815588fb195e17a"
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
 
     // Global State Variables
@@ -779,21 +686,17 @@
     window.favoritesState = JSON.parse(localStorage.getItem('global_radio_favorites_v20')) || {};
     window.historyList = JSON.parse(localStorage.getItem('global_radio_history_v20')) || []; 
 
-    // Check if user has updated the config
     const isFirebaseSetup = firebaseConfig.apiKey !== "YOUR_API_KEY";
     let app, auth, db;
 
-    // --- INITIALIZE FIREBASE IF CONFIGURED ---
     if (isFirebaseSetup) {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
 
-        // Listen for Authentication state changes
         onAuthStateChanged(auth, async (user) => {
             window.currentUser = user;
             if (user) {
-                // User is logged in! Let's fetch their data from the cloud.
                 const docRef = doc(db, 'users', user.uid);
                 try {
                     const docSnap = await getDoc(docRef);
@@ -807,7 +710,6 @@
                 window.updateAuthUI();
                 window.render();
             } else {
-                // User logged out. Clear states.
                 window.listenedState = {};
                 window.favoritesState = {};
                 window.updateAuthUI();
@@ -816,10 +718,8 @@
         });
     }
 
-    // --- CLOUD SYNC FUNCTION ---
     window.saveDataToCloudOrLocal = async function() {
         if (isFirebaseSetup && window.currentUser) {
-            // Save to Firebase
             const docRef = doc(db, 'users', window.currentUser.uid);
             try {
                 await setDoc(docRef, {
@@ -828,18 +728,31 @@
                 }, { merge: true });
             } catch(e) { console.error("Error saving to cloud:", e); }
         } else {
-            // Fallback to LocalStorage if Firebase is not set up or user not logged in
             localStorage.setItem('global_radio_listened_v20', JSON.stringify(window.listenedState));
             localStorage.setItem('global_radio_favorites_v20', JSON.stringify(window.favoritesState));
         }
     };
 
-    // --- AUTHENTICATION FUNCTIONS ---
+    // --- NEW: Toggle between Login and Register views ---
+    window.toggleAuthView = function(view) {
+        if(view === 'register') {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('registerView').style.display = 'block';
+        } else {
+            document.getElementById('registerView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'block';
+        }
+    };
+
     window.handleAuthClick = function() {
         if(window.currentUser) {
-            document.getElementById('displayEmail').innerText = window.currentUser.email;
+            // Display Name if available, otherwise email
+            const displayName = window.currentUser.displayName || window.currentUser.email.split('@')[0];
+            document.getElementById('displayEmail').innerText = displayName;
+            document.getElementById('changePasswordSection').style.display = 'none'; // hide it by default
             document.getElementById('accountModal').style.display = "block";
         } else {
+            window.toggleAuthView('login'); // Reset to login view
             document.getElementById('loginModal').style.display = "block";
         }
     };
@@ -853,33 +766,61 @@
         }
     };
 
+    // --- SEPARATE LOGIN ---
     window.handleLogin = async function() {
-        if (!isFirebaseSetup) {
-            window.showToast("⚠️ Firebase Database is not connected yet! Please check the code.");
-            return;
-        }
-
-        const email = document.getElementById('emailInput').value.trim();
-        const pw = document.getElementById('passwordInput').value.trim();
+        if (!isFirebaseSetup) return window.showToast("⚠️ Firebase Database is not connected!");
+        const email = document.getElementById('loginEmail').value.trim();
+        const pw = document.getElementById('loginPassword').value.trim();
         
-        if(!email.includes('@')) return window.showToast("⚠️ Please enter a valid email address.");
-        if(pw.length < 6) return window.showToast("⚠️ Password must be at least 6 characters.");
-
         try {
-            // Try Login first
             await signInWithEmailAndPassword(auth, email, pw);
             window.closeModal('loginModal');
             window.showToast("✅ Logged in successfully!");
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
         } catch (error) {
-            // If user doesn't exist, Register them seamlessly!
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
-                try {
-                    await createUserWithEmailAndPassword(auth, email, pw);
-                    window.closeModal('loginModal');
-                    window.showToast("✅ Account created successfully!");
-                } catch (regError) {
-                    window.showToast("⚠️ Error: " + regError.message);
-                }
+            window.showToast("⚠️ Login Failed: Check your email and password.");
+        }
+    };
+
+    // --- SEPARATE REGISTER ---
+    window.handleRegister = async function() {
+        if (!isFirebaseSetup) return window.showToast("⚠️ Firebase Database is not connected!");
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const pw = document.getElementById('regPassword').value.trim();
+        
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, pw);
+            // Update the user's profile with their Name
+            await updateProfile(userCredential.user, { displayName: name });
+            
+            window.closeModal('loginModal');
+            window.showToast(`✅ Account created for ${name}!`);
+            document.getElementById('regName').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPassword').value = '';
+        } catch (error) {
+            if (error.code === 'auth/email-already-in-use') {
+                window.showToast("⚠️ This email is already registered. Please login.");
+                window.toggleAuthView('login');
+            } else {
+                window.showToast("⚠️ Error: " + error.message);
+            }
+        }
+    };
+
+    // --- CHANGE PASSWORD ---
+    window.handleChangePassword = async function() {
+        const newPw = document.getElementById('newPasswordInput').value;
+        try {
+            await updatePassword(auth.currentUser, newPw);
+            window.showToast("✅ Password updated successfully!");
+            document.getElementById('changePasswordSection').style.display = 'none';
+            document.getElementById('newPasswordInput').value = '';
+        } catch (error) {
+            if (error.code === 'auth/requires-recent-login') {
+                window.showToast("⚠️ Security: Please logout and login again to change your password.");
             } else {
                 window.showToast("⚠️ Error: " + error.message);
             }
@@ -942,10 +883,12 @@
         window.render(true); 
     };
 
+    // FIXED: Changed Top Artist calculation to Listened count
     window.openStats = function() {
         if(window.songs.length === 0) return window.showToast("No library loaded yet.");
         const total = window.songs.length;
         const favCount = Object.keys(window.favoritesState).length;
+        const listenedCount = Object.keys(window.listenedState).length;
         
         let newCount = 0;
         window.songs.forEach(song => {
@@ -953,19 +896,11 @@
             const isListened = !!window.listenedState[id] || song.listened === true;
             if (song.is_new_arrival && !isListened) newCount++;
         });
-        
-        const artistCounts = {};
-        window.songs.forEach(s => {
-            if(!artistCounts[s.artist]) artistCounts[s.artist] = 0;
-            artistCounts[s.artist] += (s.plays || 0);
-        });
-        const topArtist = Object.keys(artistCounts).length > 0 ? 
-            Object.keys(artistCounts).reduce((a, b) => artistCounts[a] > artistCounts[b] ? a : b) : "-";
 
         document.getElementById('stat-total').innerText = total;
         document.getElementById('stat-new').innerText = newCount;
         document.getElementById('stat-fav').innerText = favCount;
-        document.getElementById('stat-artist').innerText = topArtist;
+        document.getElementById('stat-listened').innerText = listenedCount;
         document.getElementById('statsModal').style.display = "block";
     };
 
@@ -1022,7 +957,6 @@
     };
 
     window.toggleListen = function(id) {
-        // FIXED: Only show toast, do not open modal automatically
         if(isFirebaseSetup && !window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
             return;
@@ -1031,7 +965,6 @@
         if (window.listenedState[id]) { delete window.listenedState[id]; } else { window.listenedState[id] = true; }
         window.saveDataToCloudOrLocal();
         
-        // FIXED: Direct DOM manipulation to prevent scrolling/jumping
         const card = document.getElementById('card-' + id);
         if(card) {
             const isListened = !!window.listenedState[id];
@@ -1045,16 +978,14 @@
             if (badge) badge.style.display = isListened ? 'none' : 'block';
         }
         
-        // Only trigger render if we are in a tab where visibility must be updated immediately
         if(window.currentFilter === 'new' || window.currentFilter === 'listened') {
-             window.render(false, true); // True = preserve scroll position
+             window.render(false, true); 
         }
     };
 
     window.toggleFavorite = function(id, event) {
         if(event) event.stopPropagation();
         
-        // FIXED: Only show toast, do not open modal automatically
         if(isFirebaseSetup && !window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
             return;
@@ -1071,7 +1002,6 @@
             if(icon) icon.innerHTML = heartIcon;
         }
         
-        // FIXED: Use preserve scroll parameter
         if(window.currentFilter === 'favorites') window.render(false, true); 
     };
 
@@ -1145,7 +1075,6 @@
         }
     };
 
-    // FIXED: Added preserveScroll parameter to prevent jumping to top on every state change
     window.render = function(isAppend = false, preserveScroll = false) {
         const grid = document.getElementById('grid');
         const countDisplay = document.getElementById('count-display');
@@ -1154,7 +1083,7 @@
         
         if(!isAppend) {
             grid.innerHTML = '';
-            if(!preserveScroll) window.scrollTo(0, 0); // Only scroll top if not explicitly preserving
+            if(!preserveScroll) window.scrollTo(0, 0); 
         } else {
             const oldBtn = document.querySelector('.load-more-container');
             if(oldBtn) oldBtn.remove();

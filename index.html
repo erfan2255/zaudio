@@ -899,7 +899,7 @@
 
         // Loading and Error States
         if(isLoading) {
-            grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h2>در حال بارگذاری...</h2></div>`;
+            grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h2>Loading Library...</h2></div>`;
             countDisplay.innerText = '';
             return;
         }
@@ -907,9 +907,9 @@
         if(fetchError || songs.length === 0) {
             grid.innerHTML = `<div class="empty-state">
                 <i class="fa-solid fa-triangle-exclamation"></i>
-                <h2>دیتابیس در دسترس نیست</h2>
-                <p>این خطا به دلیل باز کردن کد در <b>محیط پیش‌نمایش</b> رخ داده و کاملاً طبیعی است.</p>
-                <p style="margin-top: 10px; opacity: 0.8; font-size: 0.9rem;">به محض آپلود شدن فایل‌ها در <b>GitHub Pages</b>، دیتابیس به درستی و بدون خطا خوانده خواهد شد.</p>
+                <h2>Database Unavailable</h2>
+                <p>This error occurred because the code is running in a <b>Preview Environment</b>, which is completely normal.</p>
+                <p style="margin-top: 10px; opacity: 0.8; font-size: 0.9rem;">Once the files are uploaded to <b>GitHub Pages</b>, the database will load correctly without any errors.</p>
             </div>`;
             countDisplay.innerText = '';
             return;

@@ -522,6 +522,9 @@
     <div id="grid" class="grid"></div>
     <div id="count-display" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;"></div>
     
+    <!-- INFINITE SCROLL SENTINEL -->
+    <div id="scroll-sentinel" style="height: 10px; width: 100%; margin-top: 20px;"></div>
+    
     <div class="site-footer">
         <div class="made-with">made with ❤️</div>
         <div class="copyright">All rights reserved for Erfan Shariati</div>
@@ -662,12 +665,12 @@
     // 🚨 🚨 🚨 YOUR FIREBASE CONFIGURATION GOES HERE 🚨 🚨 🚨
     // =========================================================================
     const firebaseConfig = {
-        apiKey: "AIzaSyCvaELQv2gzTlNVXtIOggh4gBGQwwN7YaQ",
-        authDomain: "zaudio-db.firebaseapp.com",
-        projectId: "zaudio-db",
-        storageBucket: "zaudio-db.firebasestorage.app",
-        messagingSenderId: "477435795983",
-        appId: "1:477435795983:web:d23e4a1815588fb195e17a"
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
 
     window.songs = []; 
@@ -835,6 +838,8 @@
         window.updateThemeIcon(savedTheme);
         window.setView(window.currentView);
         window.updateAuthUI();
+        window.setupShortcuts(); // ⌨️ Initialize keyboard shortcuts
+        window.setupInfiniteScroll(); // 🔄 Initialize infinite scroll
         window.render(); 
         
         try {
@@ -868,9 +873,40 @@
         else grid.classList.remove('list-view');
     };
 
+    window.setupInfiniteScroll = function() {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !window.isLoading && !window.fetchError) {
+                if (window.filteredSongs && window.visibleCount < window.filteredSongs.length) {
+                    window.loadMore();
+                }
+            }
+        }, { rootMargin: "300px" }); 
+        
+        const sentinel = document.getElementById('scroll-sentinel');
+        if(sentinel) observer.observe(sentinel);
+    };
+
+    window.setupShortcuts = function() {
+        window.addEventListener('keydown', function(e) {
+            if (['INPUT', 'TEXTAREA', 'EMAIL', 'PASSWORD'].includes(document.activeElement.tagName) || document.activeElement.isContentEditable) {
+                return;
+            }
+            if (e.key === '/') {
+                e.preventDefault(); 
+                document.getElementById('searchInput').focus();
+                window.showToast("⌨️ Search mode");
+            } else if (e.key.toLowerCase() === 'l') {
+                e.preventDefault();
+                const newMode = window.currentView === 'grid' ? 'list' : 'grid';
+                window.setView(newMode);
+                window.showToast(`⌨️ Switched to ${newMode} view`);
+            }
+        });
+    };
+
     window.loadMore = function() {
         window.visibleCount += 50;
-        window.render(true); 
+        window.render(true, true); 
     };
 
     window.openStats = function() {
@@ -1198,13 +1234,6 @@
                 `;
                 grid.appendChild(card);
             });
-
-            if(window.visibleCount < processed.length) {
-                const btnContainer = document.createElement('div');
-                btnContainer.className = 'load-more-container';
-                btnContainer.innerHTML = `<button class="btn-load-more" onclick="window.loadMore()"><i class="fa-solid fa-circle-arrow-down"></i> Show More</button>`;
-                grid.appendChild(btnContainer);
-            }
         }
         countDisplay.innerText = `Displaying ${Math.min(window.visibleCount, processed.length)} of ${processed.length} tracks`;
     };

@@ -218,8 +218,8 @@
             gap: 10px; 
             transition: 0.2s; 
             box-shadow: 0 4px 15px var(--accent-glow);
-            box-sizing: border-box; /* Added to fix mobile thinness */
-            min-height: 48px; /* Added to fix mobile thinness */
+            box-sizing: border-box; 
+            min-height: 48px; 
         }
         .btn-shuffle:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
         
@@ -468,7 +468,6 @@
     <div class="header">
         <h1><i class="fa-solid fa-gem"></i> Zenith Audio</h1>
         <div class="header-actions">
-            <!-- Login Button -->
             <button class="theme-btn" onclick="window.handleAuthClick()" id="loginBtn" title="Account"><i class="fa-solid fa-user"></i></button>
             <button class="theme-btn" onclick="window.openStats()" title="View Stats"><i class="fa-solid fa-chart-pie"></i></button>
             <button class="theme-btn" onclick="window.openDataModal()" title="Data"><i class="fa-solid fa-database"></i></button>
@@ -525,11 +524,11 @@
     
     <div class="site-footer">
         <div class="made-with">made with ❤️</div>
-        <div class="copyright">All rights reserved for Erfan shariati</div>
+        <div class="copyright">All rights reserved for Erfan Shariati</div>
     </div>
 </div>
 
-<!-- AUTHENTICATION MODAL (Login / Register Split) -->
+<!-- AUTHENTICATION MODAL -->
 <div id="loginModal" class="modal">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <span class="close" onclick="window.closeModal('loginModal')">&times;</span>
@@ -540,8 +539,8 @@
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Welcome back! Login to sync your music.</p>
             
             <form onsubmit="event.preventDefault(); window.handleLogin();" style="display: flex; flex-direction: column; gap: 15px;">
-                <input type="email" id="loginEmail" class="custom-input" placeholder="Email Address" required>
-                <input type="password" id="loginPassword" class="custom-input" placeholder="Password" required>
+                <input type="email" id="loginEmail" name="email" autocomplete="email" class="custom-input" placeholder="Email Address" required>
+                <input type="password" id="loginPassword" name="password" autocomplete="current-password" class="custom-input" placeholder="Password" required>
                 <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">
                     Login
                 </button>
@@ -558,9 +557,9 @@
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Create an account to save tracks safely in the Cloud.</p>
             
             <form onsubmit="event.preventDefault(); window.handleRegister();" style="display: flex; flex-direction: column; gap: 15px;">
-                <input type="text" id="regName" class="custom-input" placeholder="Your Name" required minlength="2">
-                <input type="email" id="regEmail" class="custom-input" placeholder="Email Address" required>
-                <input type="password" id="regPassword" class="custom-input" placeholder="Password (min 6 characters)" required minlength="6">
+                <input type="text" id="regName" name="name" autocomplete="name" class="custom-input" placeholder="Your Name" required minlength="2">
+                <input type="email" id="regEmail" name="email" autocomplete="email" class="custom-input" placeholder="Email Address" required>
+                <input type="password" id="regPassword" name="password" autocomplete="new-password" class="custom-input" placeholder="Password (min 6 characters)" required minlength="6">
                 <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 5px;">
                     Register
                 </button>
@@ -581,10 +580,10 @@
         <h2><i class="fa-solid fa-user-check" style="color: var(--success);"></i> Account</h2>
         <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; margin-top: 15px;">Welcome, <strong id="displayEmail" style="color: var(--text); font-size: 1.1rem;"></strong>!</p>
         
-        <!-- Change Password Section (Hidden by default) -->
+        <!-- Change Password Section -->
         <div id="changePasswordSection" style="display: none; margin-bottom: 20px; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; border: 1px solid var(--card-border);">
             <form onsubmit="event.preventDefault(); window.handleChangePassword();" style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="password" id="newPasswordInput" class="custom-input" placeholder="New Password (min 6 chars)" required minlength="6">
+                <input type="password" id="newPasswordInput" name="new-password" autocomplete="new-password" class="custom-input" placeholder="New Password (min 6 chars)" required minlength="6">
                 <div style="display: flex; gap: 10px;">
                     <button type="button" class="data-btn" style="flex: 1; padding: 10px;" onclick="document.getElementById('changePasswordSection').style.display='none'">Cancel</button>
                     <button type="submit" class="data-btn" style="flex: 1; padding: 10px; border-color: var(--success); color: var(--success);">Save</button>
@@ -621,7 +620,6 @@
                 <h3><i class="fa-solid fa-heart"></i> Loved</h3>
                 <p id="stat-fav" class="stat-highlight-fav">0</p>
             </div>
-            <!-- FIXED: Changed from Top Artist to Listened -->
             <div class="stat-box">
                 <h3><i class="fa-solid fa-circle-check"></i> Listened</h3>
                 <p id="stat-listened" style="font-size: 1.5rem; font-weight: 700;">0</p>
@@ -672,7 +670,6 @@
         appId: "1:477435795983:web:d23e4a1815588fb195e17a"
     };
 
-    // Global State Variables
     window.songs = []; 
     window.filteredSongs = []; 
     window.currentFilter = 'new';
@@ -733,7 +730,6 @@
         }
     };
 
-    // --- NEW: Toggle between Login and Register views ---
     window.toggleAuthView = function(view) {
         if(view === 'register') {
             document.getElementById('loginView').style.display = 'none';
@@ -746,13 +742,12 @@
 
     window.handleAuthClick = function() {
         if(window.currentUser) {
-            // Display Name if available, otherwise email
             const displayName = window.currentUser.displayName || window.currentUser.email.split('@')[0];
             document.getElementById('displayEmail').innerText = displayName;
-            document.getElementById('changePasswordSection').style.display = 'none'; // hide it by default
+            document.getElementById('changePasswordSection').style.display = 'none'; 
             document.getElementById('accountModal').style.display = "block";
         } else {
-            window.toggleAuthView('login'); // Reset to login view
+            window.toggleAuthView('login'); 
             document.getElementById('loginModal').style.display = "block";
         }
     };
@@ -766,7 +761,6 @@
         }
     };
 
-    // --- SEPARATE LOGIN ---
     window.handleLogin = async function() {
         if (!isFirebaseSetup) return window.showToast("⚠️ Firebase Database is not connected!");
         const email = document.getElementById('loginEmail').value.trim();
@@ -783,7 +777,6 @@
         }
     };
 
-    // --- SEPARATE REGISTER ---
     window.handleRegister = async function() {
         if (!isFirebaseSetup) return window.showToast("⚠️ Firebase Database is not connected!");
         const name = document.getElementById('regName').value.trim();
@@ -792,7 +785,6 @@
         
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, pw);
-            // Update the user's profile with their Name
             await updateProfile(userCredential.user, { displayName: name });
             
             window.closeModal('loginModal');
@@ -810,7 +802,6 @@
         }
     };
 
-    // --- CHANGE PASSWORD ---
     window.handleChangePassword = async function() {
         const newPw = document.getElementById('newPasswordInput').value;
         try {
@@ -835,7 +826,6 @@
         }
     };
 
-    // --- CORE APP FUNCTIONS ---
     window.normalizeString = function(str) { return str.toLowerCase().replace(/[^a-z0-9]/g, ''); };
     window.generateId = function(song) { return window.normalizeString(song.artist) + window.normalizeString(song.title); };
 
@@ -883,7 +873,6 @@
         window.render(true); 
     };
 
-    // FIXED: Changed Top Artist calculation to Listened count
     window.openStats = function() {
         if(window.songs.length === 0) return window.showToast("No library loaded yet.");
         const total = window.songs.length;
@@ -957,7 +946,8 @@
     };
 
     window.toggleListen = function(id) {
-        if(isFirebaseSetup && !window.currentUser) {
+        // STRICT LOGIN CHECK
+        if(!window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
             return;
         }
@@ -986,7 +976,8 @@
     window.toggleFavorite = function(id, event) {
         if(event) event.stopPropagation();
         
-        if(isFirebaseSetup && !window.currentUser) {
+        // STRICT LOGIN CHECK
+        if(!window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
             return;
         }
@@ -1223,4 +1214,3 @@
 </script>
 </body>
 </html>
-

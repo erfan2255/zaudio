@@ -616,7 +616,7 @@
     <div class="controls-area">
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Find a track..." oninput="window.render()">
+            <input type="search" id="searchInput" placeholder="Find a track..." autocomplete="off" oninput="window.render()">
         </div>
         
         <div class="sort-box">
@@ -674,13 +674,13 @@
         <h2><i class="fa-solid fa-user-circle"></i> User Account</h2>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Register or login to save your favorite tracks safely in the Cloud.</p>
         
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="email" id="emailInput" class="custom-input" placeholder="Email Address" autocomplete="email">
-            <input type="password" id="passwordInput" class="custom-input" placeholder="Password (min 6 characters)">
-            <button class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 10px;" onclick="window.handleLogin()">
+        <form onsubmit="event.preventDefault(); window.handleLogin();" style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="email" id="emailInput" class="custom-input" placeholder="Email Address" autocomplete="username" name="email">
+            <input type="password" id="passwordInput" class="custom-input" placeholder="Password (min 6 characters)" autocomplete="current-password" name="password">
+            <button type="submit" class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 10px;">
                 <i class="fa-solid fa-right-to-bracket"></i> Login / Register
             </button>
-        </div>
+        </form>
     </div>
 </div>
 

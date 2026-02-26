@@ -360,13 +360,14 @@
             color: white; 
             border-color: var(--yt-red); 
         } 
+        .btn-play span { display: inline; }
         .btn-play:hover { background: #dc2626; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
         
         .btn-action:not(.btn-play):hover { background: var(--input-bg); transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
         .btn-action.is-active { background: var(--success); border-color: var(--success); color: white; }
         .btn-google:hover { color: var(--google-blue); border-color: var(--google-blue); }
 
-        /* --- LIST VIEW STYLES --- */
+        /* --- LIST VIEW STYLES (Mobile Over-flow Fixes) --- */
         .list-view .card { 
             flex-direction: row; 
             align-items: center; 
@@ -379,23 +380,29 @@
             display: flex;
             width: auto;
             margin-top: 0;
-            gap: 10px;
+            gap: 8px;
+            flex-shrink: 0; /* Prevents buttons from squishing */
         }
         
         .list-view .btn-action {
-            width: 38px; 
-            height: 38px; 
+            width: 36px; 
+            height: 36px; 
             padding: 0; 
             border-radius: 50%; 
             font-size: 1rem; 
             flex-grow: 0;
+            justify-content: center;
         }
+        
+        /* Convert Play button to circular icon in list-view */
         .list-view .btn-play {
-            width: auto; 
-            padding: 0 20px; 
-            border-radius: 20px; 
+            width: 36px; 
+            height: 36px; 
+            padding: 0; 
+            border-radius: 50%; 
             grid-column: auto; 
         }
+        .list-view .btn-play span { display: none; } /* Hide word "Play" */
 
         .list-view .img-container { 
             width: 50px; 
@@ -428,15 +435,29 @@
             width: 100%; 
             border: none; 
             gap: 10px;
+            min-width: 0; /* Critical for truncating text */
         }
         .list-view .info-col { 
             display: flex; 
             flex-direction: column; 
             flex-grow: 1; 
-            min-width: 100px; 
+            min-width: 0; /* Critical to prevent overflow pushing buttons */
+            margin-right: 5px;
         }
-        .list-view .title { font-size: 1rem; margin-bottom: 2px; }
-        .list-view .artist { font-size: 0.85rem; }
+        .list-view .title { 
+            font-size: 1rem; 
+            margin-bottom: 2px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: block; 
+        }
+        .list-view .artist { 
+            font-size: 0.85rem; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
         
         .list-view .meta { 
             margin: 0; 
@@ -450,10 +471,23 @@
             font-size: 0.8rem; 
             margin-right: 15px; 
             color: var(--text-muted);
+            flex-shrink: 0;
         }
 
+        /* MOBILE SPECIFIC FIXES */
         @media (max-width: 768px) { 
             .list-view .meta { display: none; } 
+            
+            /* Squeeze list view for small screens */
+            .list-view .card { padding: 8px 10px; }
+            .list-view .img-container { width: 45px; height: 45px; margin-right: 10px; }
+            .list-view .fav-icon { margin-right: 10px; font-size: 1.1rem; }
+            .list-view .actions { gap: 6px; }
+            .list-view .btn-action { width: 32px; height: 32px; font-size: 0.85rem; }
+            .list-view .btn-play { width: 32px; height: 32px; }
+            .list-view .title { font-size: 0.95rem; }
+            .list-view .artist { font-size: 0.8rem; }
+            
             .header h1 { font-size: 1.3rem; }
             .header-actions { gap: 8px; }
             .controls-area { gap: 10px; padding: 15px; }
@@ -861,8 +895,6 @@
             
             newSongs.forEach(s => {
                 const id = generateId(s);
-                // We DON'T load global "listened" states from the file anymore to avoid overwriting user states.
-                // The JSON just provides the catalog.
                 
                 if(currentMap.has(id)) {
                     const existing = currentMap.get(id);
@@ -962,7 +994,10 @@
                 const id = generateId(song);
                 const isListened = !!listenedState[id] || song.listened === true;
                 const isFav = !!favoritesState[id];
-                const googleLyricUrl = `https://www.google.com/search?q=${encodeURIComponent(song.artist + ' ' + song.title + ' lyrics')}`;
+                
+                // FIXED: Removed 'lyrics' from the Google Search URL
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
+                
                 const imgUrl = song.image || 'https://via.placeholder.com/300x300/1e293b/94a3b8?text=No+Image';
                 
                 let sourceHTML = '';
@@ -1005,10 +1040,11 @@
                         </div>
 
                         <div class="actions">
-                            <button class="btn-action btn-play" onclick="openYtMusic('${song.artist.replace(/'/g, "\\'")}', '${song.title.replace(/'/g, "\\'")}', '${id}')" title="Play"><i class="fa-solid fa-play"></i> Play</button>
+                            <button class="btn-action btn-play" onclick="openYtMusic('${song.artist.replace(/'/g, "\\'")}', '${song.title.replace(/'/g, "\\'")}', '${id}')" title="Play"><i class="fa-solid fa-play"></i> <span>Play</span></button>
                             
-                            <a href="${googleLyricUrl}" 
-                               target="_blank" class="btn-action btn-google" title="Lyrics"><i class="fa-brands fa-google"></i></a>
+                            <!-- FIXED: Changed title from Lyrics to Google Search -->
+                            <a href="${googleSearchUrl}" 
+                               target="_blank" class="btn-action btn-google" title="Google Search"><i class="fa-brands fa-google"></i></a>
 
                             <button class="btn-action btn-listen ${isListened ? 'is-active' : ''}" onclick="toggleListen('${id}')" title="Mark Done">
                                 ${listenIcon}

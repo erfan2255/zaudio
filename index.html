@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zenith Audio</title>
+    <!-- Favicon (Diamond Icon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%2306b6d4' d='M116.7 33.8c4.5-6.1 11.7-9.8 19.3-9.8H376c7.6 0 14.8 3.6 19.3 9.8l112 152c6.8 9.2 6.1 21.9-1.5 30.4l-232 256c-4.6 5-11 7.9-17.8 7.9s-13.2-2.9-17.8-7.9l-232-256c-7.7-8.5-8.3-21.2-1.5-30.4l112-152z'/></svg>">
     <!-- FontAwesome 6.4.2 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Google Fonts -->
@@ -322,7 +324,21 @@
         .card:has(.new-badge) .fav-icon { top: 35px; }
 
         .title { font-weight: 700; font-size: 0.95rem; line-height: 1.3; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--text); }
-        .artist { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        
+        /* FIXED: Changed artist CSS to prevent full-width hover trigger */
+        .artist { 
+            display: inline-block; 
+            width: fit-content; 
+            max-width: 100%;
+            color: var(--text-muted); 
+            font-size: 0.8rem; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
         .artist:hover { color: var(--accent); }
         
         .meta { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.7rem; border-top: 1px solid var(--card-border); }
@@ -442,6 +458,7 @@
             flex-grow: 1; 
             min-width: 0; 
             margin-right: 5px;
+            align-items: flex-start; /* Ensures content aligns properly */
         }
         .list-view .title { 
             font-size: 1rem; 
@@ -450,12 +467,7 @@
             overflow: hidden; 
             text-overflow: ellipsis; 
             display: block; 
-        }
-        .list-view .artist { 
-            font-size: 0.85rem; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
+            width: 100%;
         }
         
         .list-view .meta { 
@@ -651,7 +663,7 @@
     <!-- COPYRIGHT FOOTER -->
     <div class="site-footer">
         <div class="made-with">made with ❤️</div>
-        <div class="copyright">All rights reserved for Erfan Shariati</div>
+        <div class="copyright">All rights reserved for Erfan shariati</div>
     </div>
 </div>
 
@@ -1010,23 +1022,41 @@
     };
 
     window.toggleListen = function(id) {
+        // FIXED: Only show toast, do not open modal automatically
         if(isFirebaseSetup && !window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
-            document.getElementById('loginModal').style.display = "block";
             return;
         }
 
         if (window.listenedState[id]) { delete window.listenedState[id]; } else { window.listenedState[id] = true; }
         window.saveDataToCloudOrLocal();
-        window.render();
+        
+        // FIXED: Direct DOM manipulation to prevent scrolling/jumping
+        const card = document.getElementById('card-' + id);
+        if(card) {
+            const isListened = !!window.listenedState[id];
+            card.classList.toggle('listened', isListened);
+            const btnListen = card.querySelector('.btn-listen');
+            if (btnListen) {
+                btnListen.classList.toggle('is-active', isListened);
+                btnListen.innerHTML = isListened ? '<i class="fa-solid fa-rotate-left"></i>' : '<i class="fa-solid fa-check"></i>';
+            }
+            const badge = card.querySelector('.new-badge');
+            if (badge) badge.style.display = isListened ? 'none' : 'block';
+        }
+        
+        // Only trigger render if we are in a tab where visibility must be updated immediately
+        if(window.currentFilter === 'new' || window.currentFilter === 'listened') {
+             window.render(false, true); // True = preserve scroll position
+        }
     };
 
     window.toggleFavorite = function(id, event) {
         if(event) event.stopPropagation();
         
+        // FIXED: Only show toast, do not open modal automatically
         if(isFirebaseSetup && !window.currentUser) {
             window.showToast("⚠️ Please Login or Register first!");
-            document.getElementById('loginModal').style.display = "block";
             return;
         }
 
@@ -1041,7 +1071,8 @@
             if(icon) icon.innerHTML = heartIcon;
         }
         
-        if(window.currentFilter === 'favorites') window.render();
+        // FIXED: Use preserve scroll parameter
+        if(window.currentFilter === 'favorites') window.render(false, true); 
     };
 
     window.shufflePlay = function() {
@@ -1114,7 +1145,8 @@
         }
     };
 
-    window.render = function(isAppend = false) {
+    // FIXED: Added preserveScroll parameter to prevent jumping to top on every state change
+    window.render = function(isAppend = false, preserveScroll = false) {
         const grid = document.getElementById('grid');
         const countDisplay = document.getElementById('count-display');
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1122,7 +1154,7 @@
         
         if(!isAppend) {
             grid.innerHTML = '';
-            window.scrollTo(0, 0);
+            if(!preserveScroll) window.scrollTo(0, 0); // Only scroll top if not explicitly preserving
         } else {
             const oldBtn = document.querySelector('.load-more-container');
             if(oldBtn) oldBtn.remove();
@@ -1262,4 +1294,3 @@
 </script>
 </body>
 </html>
-

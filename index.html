@@ -381,7 +381,7 @@
             width: auto;
             margin-top: 0;
             gap: 8px;
-            flex-shrink: 0; /* Prevents buttons from squishing */
+            flex-shrink: 0; 
         }
         
         .list-view .btn-action {
@@ -394,7 +394,6 @@
             justify-content: center;
         }
         
-        /* Convert Play button to circular icon in list-view */
         .list-view .btn-play {
             width: 36px; 
             height: 36px; 
@@ -402,7 +401,7 @@
             border-radius: 50%; 
             grid-column: auto; 
         }
-        .list-view .btn-play span { display: none; } /* Hide word "Play" */
+        .list-view .btn-play span { display: none; } 
 
         .list-view .img-container { 
             width: 50px; 
@@ -435,13 +434,13 @@
             width: 100%; 
             border: none; 
             gap: 10px;
-            min-width: 0; /* Critical for truncating text */
+            min-width: 0; 
         }
         .list-view .info-col { 
             display: flex; 
             flex-direction: column; 
             flex-grow: 1; 
-            min-width: 0; /* Critical to prevent overflow pushing buttons */
+            min-width: 0; 
             margin-right: 5px;
         }
         .list-view .title { 
@@ -474,11 +473,9 @@
             flex-shrink: 0;
         }
 
-        /* MOBILE SPECIFIC FIXES */
         @media (max-width: 768px) { 
             .list-view .meta { display: none; } 
             
-            /* Squeeze list view for small screens */
             .list-view .card { padding: 8px 10px; }
             .list-view .img-container { width: 45px; height: 45px; margin-right: 10px; }
             .list-view .fav-icon { margin-right: 10px; font-size: 1.1rem; }
@@ -506,16 +503,16 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: var(--modal-bg); backdrop-filter: blur(5px); }
         
         .modal-content { 
-            box-sizing: border-box; /* FIXED: Prevents padding from breaking width on mobile */
+            box-sizing: border-box;
             border-radius: 20px; 
             border: 1px solid var(--card-border); 
             background: var(--card-bg); 
             backdrop-filter: blur(16px);
             color: var(--text);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
-            margin: 15vh auto; /* FIXED: Better vertical centering on mobile */
+            margin: 15vh auto; 
             padding: 25px; 
-            width: 90%; /* FIXED: slightly wider on mobile to compensate for box-sizing */
+            width: 90%; 
             max-width: 500px; 
             position: relative;
             animation: modalPop 0.3s ease-out forwards;
@@ -530,6 +527,22 @@
         .close { color: var(--text-muted); float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close:hover { color: var(--text); }
         
+        /* Custom Inputs for Modals */
+        .custom-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: 0.2s;
+            outline: none;
+        }
+        .custom-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
         .stat-box { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 15px; transition: 0.2s; }
         .stat-box:hover { transform: translateY(-3px); background: rgba(0,0,0,0.1); }
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
@@ -577,6 +590,9 @@
     <div class="header">
         <h1><i class="fa-solid fa-gem"></i> Zenith Audio</h1>
         <div class="header-actions">
+            <!-- New Login Button -->
+            <button class="theme-btn" id="loginBtn" title="Account"><i class="fa-solid fa-user"></i></button>
+            
             <button class="theme-btn" onclick="openStats()" title="View Stats"><i class="fa-solid fa-chart-pie"></i></button>
             <button class="theme-btn" onclick="openDataModal()" title="Data"><i class="fa-solid fa-database"></i></button>
             <button class="theme-btn" onclick="toggleTheme()" id="themeIcon"><i class="fa-solid fa-moon"></i></button>
@@ -639,6 +655,36 @@
     </div>
 </div>
 
+<!-- LOGIN / REGISTER MODAL -->
+<div id="loginModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <span class="close" onclick="closeModal('loginModal')">&times;</span>
+        <h2><i class="fa-solid fa-user-circle"></i> User Account</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">Register or login to save your favorite tracks and manage your listening history.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="text" id="usernameInput" class="custom-input" placeholder="Username" autocomplete="off">
+            <input type="password" id="passwordInput" class="custom-input" placeholder="Password">
+            <button class="btn-shuffle" style="justify-content: center; width: 100%; margin-top: 10px;" onclick="handleLogin()">
+                <i class="fa-solid fa-right-to-bracket"></i> Login / Register
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ACCOUNT LOGGED IN MODAL -->
+<div id="accountModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <span class="close" onclick="closeModal('accountModal')">&times;</span>
+        <h2><i class="fa-solid fa-user-check" style="color: var(--success);"></i> Logged In</h2>
+        <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; margin-top: 15px;">Welcome back, <strong id="displayUsername" style="color: var(--text); font-size: 1.1rem;"></strong>!</p>
+        
+        <button class="data-btn danger" style="width: 100%; flex-direction: row;" onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket" style="margin: 0;"></i> <span>Logout</span>
+        </button>
+    </div>
+</div>
+
 <!-- STATS MODAL -->
 <div id="statsModal" class="modal">
     <div class="modal-content">
@@ -698,6 +744,9 @@
     let isLoading = true;
     let fetchError = false;
 
+    // --- AUTHENTICATION MOCK ---
+    let currentUser = localStorage.getItem('zenith_user') || null;
+
     let listenedState = JSON.parse(localStorage.getItem('global_radio_listened_v20')) || {};
     let favoritesState = JSON.parse(localStorage.getItem('global_radio_favorites_v20')) || {};
     let historyList = JSON.parse(localStorage.getItem('global_radio_history_v20')) || []; 
@@ -710,10 +759,10 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeIcon(savedTheme);
         setView(currentView);
-        render(); // Show loading state initially
+        updateAuthUI(); // Update Header Login Icon
+        render(); 
         
         try {
-            // Check if running in a blob/file preview environment to avoid ugly console TypeError
             if (window.location.protocol === 'blob:' || window.location.protocol === 'file:') {
                 throw new Error("Local/Preview environment detected. Cannot fetch relative files.");
             }
@@ -736,6 +785,44 @@
                 event.target.style.display = "none";
             }
         }
+    }
+
+    // --- LOGIN / REGISTER LOGIC ---
+    function updateAuthUI() {
+        const btn = document.getElementById('loginBtn');
+        if(currentUser) {
+            btn.innerHTML = '<i class="fa-solid fa-user-check" style="color: var(--success);"></i>';
+            btn.onclick = () => {
+                document.getElementById('displayUsername').innerText = currentUser;
+                document.getElementById('accountModal').style.display = "block";
+            };
+        } else {
+            btn.innerHTML = '<i class="fa-solid fa-user"></i>';
+            btn.onclick = () => document.getElementById('loginModal').style.display = "block";
+        }
+    }
+
+    function handleLogin() {
+        const un = document.getElementById('usernameInput').value.trim();
+        const pw = document.getElementById('passwordInput').value.trim();
+        if(un.length < 3) return showToast("⚠️ Username must be at least 3 characters.");
+        if(pw.length < 4) return showToast("⚠️ Password must be at least 4 characters.");
+
+        currentUser = un;
+        localStorage.setItem('zenith_user', un);
+        closeModal('loginModal');
+        document.getElementById('usernameInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        updateAuthUI();
+        showToast(`✅ Welcome, ${un}!`);
+    }
+
+    function handleLogout() {
+        currentUser = null;
+        localStorage.removeItem('zenith_user');
+        closeModal('accountModal');
+        updateAuthUI();
+        showToast("👋 Logged out successfully.");
     }
 
     function setView(mode) {
@@ -762,7 +849,6 @@
         const total = songs.length;
         const favCount = Object.keys(favoritesState).length;
         
-        // Calculate new tracks exactly like the "New" filter does
         let newCount = 0;
         songs.forEach(song => {
             const id = generateId(song);
@@ -795,7 +881,6 @@
 
     function exportTextList(type) {
         let exportData = [];
-        
         if (type === 'favorites') {
             exportData = songs.filter(s => favoritesState[generateId(s)]);
         } else if (type === 'listened') {
@@ -821,6 +906,8 @@
             localStorage.removeItem('global_radio_listened_v20');
             localStorage.removeItem('global_radio_favorites_v20');
             localStorage.removeItem('global_radio_history_v20');
+            // Mock auth reset too
+            localStorage.removeItem('zenith_user');
             location.reload();
         }
     }
@@ -847,6 +934,13 @@
     }
 
     function toggleListen(id) {
+        // ENFORCE LOGIN
+        if(!currentUser) {
+            showToast("⚠️ Please Login or Register first!");
+            document.getElementById('loginModal').style.display = "block";
+            return;
+        }
+
         if (listenedState[id]) { delete listenedState[id]; } else { listenedState[id] = true; }
         localStorage.setItem('global_radio_listened_v20', JSON.stringify(listenedState));
         render();
@@ -854,6 +948,14 @@
 
     function toggleFavorite(id, event) {
         if(event) event.stopPropagation();
+        
+        // ENFORCE LOGIN
+        if(!currentUser) {
+            showToast("⚠️ Please Login or Register first!");
+            document.getElementById('loginModal').style.display = "block";
+            return;
+        }
+
         if (favoritesState[id]) { delete favoritesState[id]; } else { favoritesState[id] = true; }
         localStorage.setItem('global_radio_favorites_v20', JSON.stringify(favoritesState));
         
@@ -873,7 +975,7 @@
         if(candidates.length === 0) return showToast("No tracks to shuffle in the current view!");
         const randomIndex = Math.floor(Math.random() * candidates.length);
         const song = candidates[randomIndex];
-        openYt(song.artist, song.title, generateId(song)); /* FIXED: Changed openYtMusic to openYt */
+        openYt(song.artist, song.title, generateId(song));
     }
 
     function filterByArtist(artistName) {
@@ -1019,10 +1121,7 @@
                 const id = generateId(song);
                 const isListened = !!listenedState[id] || song.listened === true;
                 const isFav = !!favoritesState[id];
-                
-                // FIXED: Removed 'lyrics' from the Google Search URL
                 const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
-                
                 const imgUrl = song.image || 'https://via.placeholder.com/300x300/1e293b/94a3b8?text=No+Image';
                 
                 let sourceHTML = '';
@@ -1067,7 +1166,6 @@
                         <div class="actions">
                             <button class="btn-action btn-play" onclick="openYtMusic('${song.artist.replace(/'/g, "\\'")}', '${song.title.replace(/'/g, "\\'")}', '${id}')" title="Play"><i class="fa-solid fa-play"></i> <span>Play</span></button>
                             
-                            <!-- FIXED: Changed title from Lyrics to Google Search -->
                             <a href="${googleSearchUrl}" 
                                target="_blank" class="btn-action btn-google" title="Google Search"><i class="fa-brands fa-google"></i></a>
 

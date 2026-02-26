@@ -606,7 +606,7 @@
             <button class="view-btn" id="btn-list" onclick="setView('list')" title="List View"><i class="fa-solid fa-bars"></i></button>
         </div>
         
-        <button class="btn-shuffle" onclick="shufflePlay()"><i class="fa-solid fa-shuffle"></i> Surprise Me</button>
+        <button class="btn-shuffle" onclick="shufflePlay()"><i class="fa-solid fa-shuffle"></i> Shuffle</button>
     </div>
 
     <div class="tabs">
@@ -824,10 +824,17 @@
         }
     }
 
-    function openYtMusic(artist, title, id) {
+    function openYt(artist, title, id) {
         addToHistory(id);
         const query = encodeURIComponent(artist + ' ' + title);
         const url = `https://www.youtube.com/results?search_query=${query}`;
+        window.open(url, '_blank');
+    }
+
+    function openYtMusic(artist, title, id) {
+        addToHistory(id);
+        const query = encodeURIComponent(artist + ' ' + title);
+        const url = `https://music.youtube.com/search?q=${query}`;
         window.open(url, '_blank');
     }
 
@@ -861,8 +868,8 @@
     }
 
     function shufflePlay() {
-        const candidates = songs.filter(s => !listenedState[generateId(s)] && s.is_new_arrival);
-        if(candidates.length === 0) return showToast("No new songs to shuffle!");
+        const candidates = filteredSongs;
+        if(candidates.length === 0) return showToast("No tracks to shuffle in the current view!");
         const randomIndex = Math.floor(Math.random() * candidates.length);
         const song = candidates[randomIndex];
         openYtMusic(song.artist, song.title, generateId(song));
@@ -1036,7 +1043,7 @@
                 const listenIcon = isListened ? '<i class="fa-solid fa-rotate-left"></i>' : '<i class="fa-solid fa-check"></i>';
 
                 card.innerHTML = `
-                    <div class="img-container" onclick="openYtMusic('${song.artist.replace(/'/g, "\\'")}', '${song.title.replace(/'/g, "\\'")}', '${id}')">
+                    <div class="img-container" onclick="openYt('${song.artist.replace(/'/g, "\\'")}', '${song.title.replace(/'/g, "\\'")}', '${id}')">
                         ${badge}
                         ${sourceHTML}
                         <div class="play-overlay"><div class="play-icon-large"><i class="fa-solid fa-play"></i></div></div>

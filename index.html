@@ -28,7 +28,7 @@
             
             --success: #10b981;
             --love: #ec4899;
-            --fire: #f97316; /* FIXED: Added Fire Color */
+            --fire: #f97316; /* این خط برای رنگی شدن تعداد پخش اضافه شود */
             
             --input-bg: rgba(0, 0, 0, 0.3);
             --modal-bg: rgba(0, 0, 0, 0.9);
@@ -481,7 +481,7 @@
     <div class="controls-area">
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" id="searchInput" placeholder="Find a track..." autocomplete="off" oninput="window.render()">
+            <input type="search" id="searchInput" placeholder="Find a track..." autocomplete="off" oninput="window.handleSearch()">
         </div>
         
         <div class="sort-box">
@@ -860,7 +860,9 @@
             if (window.location.protocol === 'blob:' || window.location.protocol === 'file:') {
                 throw new Error("Local/Preview environment detected.");
             }
-            const response = await fetch('global_music_library_COMPLETE.json');
+            // اضافه شدن Cache-Buster برای لود شدن فوری آهنگ‌های جدید
+            const cacheBuster = new Date().getTime();
+            const response = await fetch(`global_music_library_COMPLETE.json?nocache=${cacheBuster}`, { cache: "no-store" });
             if (!response.ok) throw new Error('Network response was not ok');
             const jsonString = await response.text();
             window.processJson(jsonString);
@@ -1061,8 +1063,26 @@
         window.openYt(song.artist, song.title, window.generateId(song));
     };
 
+    // تابع جدید برای جستجوی سراسری هنگام تایپ
+    window.handleSearch = function() {
+        const val = document.getElementById('searchInput').value.trim();
+        const autoSwitchTabs = ['new', 'Unk', '2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'];
+        
+        if (val.length > 0 && autoSwitchTabs.includes(window.currentFilter)) {
+            window.currentFilter = 'all';
+            window.visibleCount = 50; 
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-all').classList.add('active');
+        }
+        window.render();
+    };
+
+    // آپدیت تابع خواننده برای جستجوی سراسری
     window.filterByArtist = function(artistName) {
         document.getElementById('searchInput').value = artistName;
+        window.currentFilter = 'all'; 
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-all').classList.add('active');
         window.visibleCount = 50; 
         window.render();
         window.showToast(`Filtered: ${artistName}`);
@@ -1181,7 +1201,6 @@
                 const favA = window.globalFavCounts[window.generateId(a)] || 0;
                 const favB = window.globalFavCounts[window.generateId(b)] || 0;
                 if (favB !== favA) return favB - favA;
-                // fallback if tie
                 if (isUnkA && !isUnkB) return 1; 
                 if (!isUnkA && isUnkB) return -1;
                 return dateB.localeCompare(dateA); 
@@ -1189,7 +1208,6 @@
 
             if (sortType === 'plays_high') {
                 if (b.plays !== a.plays) return b.plays - a.plays;
-                // fallback if tie
                 if (isUnkA && !isUnkB) return 1; 
                 if (!isUnkA && isUnkB) return -1;
                 return dateB.localeCompare(dateA); 
@@ -1260,7 +1278,7 @@
                             <span><i class="fa-regular fa-calendar"></i> ${song.release_date || 'Unk'}</span>
                             <div style="display: flex; gap: 12px; align-items: center;">
                                 <span class="global-fav-counter" title="${globalFavs} users loved this" style="color: var(--love); font-weight: 700; display: ${favDisplay};"><i class="fa-solid fa-heart"></i> ${globalFavs}</span>
-                                <!-- FIXED: Changed fire icon styling to bold orange -->
+                                
                                 <span style="color: var(--fire); font-weight: 700;" title="${song.plays} plays"><i class="fa-solid fa-fire"></i> ${song.plays}</span>
                             </div>
                         </div>

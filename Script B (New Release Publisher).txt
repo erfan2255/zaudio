@@ -1,0 +1,139 @@
+# @title 🔵 Script B: New Release Publisher (Dynamic Badges)
+# @markdown **Step 1:** Upload `global_music_library_PENDING.json`.
+# @markdown **Step 2:** Paste your corrected new songs below. (It's okay if they have the `| 🇬🇧` flags on them!)
+
+import requests
+import json
+import time
+import re
+import datetime
+from google.colab import files
+
+# ==========================================
+# 👇 PASTE YOUR CORRECTED NEW SONGS HERE 👇
+# ==========================================
+corrected_new_songs = """
+PASTE_THE_FIXED_LIST_HERE
+"""
+# ==========================================
+
+PENDING_FILENAME = "global_music_library_PENDING.json"
+FINAL_FILENAME = "global_music_library_COMPLETE.json"
+
+# --- UNIVERSAL NORMALIZER ---
+def normalize_key(artist, title):
+    a = artist.lower()
+    t = title.lower()
+    a = re.split(r"(?i)\s*(?:&|,|\bfeat\.?|\bft\.?|\bfeaturing\b|\bwith\b|\bx\b|\bvs\.?)\s*", a)[0].strip()
+    t = re.sub(r"\(.*?\)|\[.*?\]", "", t).strip()
+    t = re.sub(r"(?i)\s*(remix|edit|mix)$", "", t).strip()
+    a_clean = re.sub(r"[^a-z0-9]", "", a)
+    t_clean = re.sub(r"[^a-z0-9]", "", t)
+    return f"{a_clean}||{t_clean}"
+
+print("📂 Please upload 'global_music_library_PENDING.json'...")
+try:
+    uploaded = files.upload()
+    if PENDING_FILENAME not in uploaded:
+        found = [f for f in uploaded.keys() if f.endswith('.json')]
+        if found: PENDING_FILENAME = found[0]
+
+    with open(PENDING_FILENAME, "r", encoding="utf-8") as f:
+        library = json.load(f)
+    print(f"📖 Library Loaded: {len(library)} songs.")
+except:
+    print("❌ Error: File not found.")
+    library = {}
+
+def fetch_meta(query):
+    url = "https://itunes.apple.com/search"
+    clean_q = re.sub(r"\(.*?\)|\[.*?\]|feat\.|ft\.", "", query).strip()
+    
+    for country in ["GB", "US"]:
+        try:
+            params = {"term": clean_q, "media": "music", "entity": "song", "limit": 1, "country": country}
+            r = requests.get(url, params=params, timeout=5)
+            if r.json()["resultCount"] > 0:
+                return r.json()["results"][0]
+            time.sleep(0.5)
+        except: pass
+    return None
+
+lines = [line.strip() for line in corrected_new_songs.strip().split('\n') if line.strip() and line.strip() != "PASTE_THE_FIXED_LIST_HERE"]
+print(f"\n🚀 Fetching metadata for {len(lines)} new songs...")
+
+for i, raw_line in enumerate(lines):
+    
+    # NEW LOGIC: Extract the badge if it exists in the pasted text!
+    search_query = raw_line
+    badge_to_apply = "📻" # Default if no badge found
+    
+    if "|" in raw_line:
+        parts = raw_line.split("|")
+        search_query = parts[0].strip()
+        badge_to_apply = parts[1].strip()
+
+    print(f"[{i+1}/{len(lines)}] {search_query[:30]}...", end=" ")
+    track = fetch_meta(search_query)
+    
+    if track:
+        key = normalize_key(track['artistName'], track['trackName'])
+        
+        if key in library:
+            library[key]['plays'] += 1
+            # Merge badges if found on a different station
+            if badge_to_apply not in library[key].get('source_badge', ''):
+                library[key]['source_badge'] = library[key].get('source_badge', '') + " " + badge_to_apply
+            print(f"✅ Merged Existing: {track['trackName']}")
+        else:
+            library[key] = {
+                "artist": track['artistName'],
+                "title": track['trackName'],
+                "plays": 1, 
+                "first_seen": str(datetime.date.today()),
+                "last_seen": str(datetime.date.today()),
+                "release_date": track.get("releaseDate", "")[:10],
+                "image": track["artworkUrl100"].replace("100x100bb", "300x300bb"),
+                "is_new_arrival": True,
+                "listened": False,
+                "source_badge": badge_to_apply # <-- Applies the Correct Country Badge!
+            }
+            print(f"✅ Added: {track['trackName']}")
+    else:
+        # Fallback Mode
+        artist, title = "Unknown Artist", search_query
+        if " - " in search_query:
+            parts = search_query.split(" - ", 1)
+            artist, title = parts[0].strip(), parts[1].strip()
+            
+        key = normalize_key(artist, title)
+        
+        if key in library:
+            library[key]['plays'] += 1
+            if badge_to_apply not in library[key].get('source_badge', ''):
+                library[key]['source_badge'] = library[key].get('source_badge', '') + " " + badge_to_apply
+            print(f"⚠️ Merged Existing (No Meta): {title}")
+        else:
+            library[key] = {
+                "artist": artist,
+                "title": title,
+                "plays": 1, 
+                "first_seen": str(datetime.date.today()),
+                "last_seen": str(datetime.date.today()),
+                "release_date": "Unknown",
+                "image": "https://via.placeholder.com/300x300/1e293b/94a3b8?text=No+Cover",
+                "is_new_arrival": True,
+                "listened": False,
+                "source_badge": badge_to_apply # <-- Applies the Correct Country Badge!
+            }
+            print(f"☑️ Added without metadata: {title}")
+    
+    time.sleep(1.0)
+
+# Final Save
+with open(FINAL_FILENAME, "w", encoding="utf-8") as f:
+    json.dump(library, f, indent=4)
+
+print("\n" + "="*30)
+print("🎉 WEEKLY UPDATE COMPLETE!")
+files.download(FINAL_FILENAME)

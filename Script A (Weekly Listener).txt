@@ -1,0 +1,154 @@
+# @title 📅 Script A: Weekly Listener (Update Counts + Detect New Songs)
+# @markdown **Step 1:** Upload your existing `global_music_library_COMPLETE.json`.
+# @markdown **Step 2:** The script auto-cleans duplicates and updates play counts!
+# @markdown **Step 3:** It exports `new_songs_to_review.txt` (Now tracks 🇺🇸 and 🇬🇧).
+
+import requests
+from bs4 import BeautifulSoup
+import json
+import time
+import re
+import random
+from google.colab import files
+import datetime
+
+# --- CONFIGURATION ---
+OLD_LIBRARY_FILENAME = "global_music_library_COMPLETE.json"
+NEW_SONGS_FILENAME = "new_songs_to_review.txt"
+UPDATED_LIBRARY_FILENAME = "global_music_library_PENDING.json"
+
+STATIONS = [
+    {"name": "Capital FM", "base": "https://onlineradiobox.com/uk/capitalfmuk/playlist/", "suffix": "?cs=uk.capitalfmuk", "fmt": "artist-title", "badge": "🇬🇧"},
+    {"name": "Pulse 87 NY", "base": "https://onlineradiobox.com/us/pulse87/playlist/", "suffix": "?cs=us.pulse87", "fmt": "title-artist", "badge": "🇺🇸"}
+]
+
+# --- UNIVERSAL NORMALIZER ---
+def normalize_key(artist, title):
+    a = artist.lower()
+    t = title.lower()
+    a = re.split(r"(?i)\s*(?:&|,|\bfeat\.?|\bft\.?|\bfeaturing\b|\bwith\b|\bx\b|\bvs\.?)\s*", a)[0].strip()
+    t = re.sub(r"\(.*?\)|\[.*?\]", "", t).strip()
+    t = re.sub(r"(?i)\s*(remix|edit|mix)$", "", t).strip()
+    a_clean = re.sub(r"[^a-z0-9]", "", a)
+    t_clean = re.sub(r"[^a-z0-9]", "", t)
+    return f"{a_clean}||{t_clean}"
+
+# --- 1. LOAD MASTER DATABASE ---
+print("📂 Please upload your LAST 'global_music_library_COMPLETE.json'...")
+try:
+    uploaded = files.upload()
+    if OLD_LIBRARY_FILENAME not in uploaded:
+        found = [f for f in uploaded.keys() if f.endswith('.json')]
+        if found: OLD_LIBRARY_FILENAME = found[0]
+            
+    with open(OLD_LIBRARY_FILENAME, "r", encoding="utf-8") as f:
+        library = json.load(f)
+    print(f"📖 Master Database Loaded: {len(library)} raw songs.")
+except:
+    print("⚠️ No file uploaded. Starting from scratch.")
+    library = {}
+
+# --- AUTO-CLEANER: MERGE DUPLICATES ---
+print("\n🧹 Running Library Auto-Cleaner (Fixing Duplicates)...")
+cleaned_library = {}
+dupes_fixed = 0
+
+for old_key, data in library.items():
+    new_key = normalize_key(data['artist'], data['title'])
+    
+    if new_key in cleaned_library:
+        existing = cleaned_library[new_key]
+        existing['plays'] += data.get('plays', 1)
+        
+        b1 = existing.get('source_badge', '')
+        b2 = data.get('source_badge', '')
+        combined = set(b1.split() + b2.split())
+        existing['source_badge'] = " ".join(filter(None, combined)).replace("🆕", "").strip()
+        
+        if data.get('image') and 'placeholder' not in data.get('image', ''):
+            existing['image'] = data['image']
+            existing['release_date'] = data.get('release_date', existing.get('release_date'))
+            existing['artist'] = data['artist']
+            existing['title'] = data['title']
+        
+        dupes_fixed += 1
+    else:
+        cleaned_library[new_key] = data
+
+library = cleaned_library
+if dupes_fixed > 0: print(f"   ✨ Success! Merged {dupes_fixed} duplicate entries!")
+
+# --- 2. SCRAPE FRESH DATA ---
+new_scraped_data = []
+
+print("\n🕷️ Scraping Fresh Radio Data...")
+for station in STATIONS:
+    print(f"   📡 {station['name']}...", end=" ")
+    count = 0
+    for day in range(7):
+        url = f"{station['base']}{day}{station['suffix']}" if day > 0 else f"{station['base']}{station['suffix']}"
+        try:
+            r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.text, 'html.parser')
+                for row in soup.find_all('tr'):
+                    link = row.find('a', href=True)
+                    if link and "/track/" in link['href'] and " - " in link.text:
+                        parts = link.text.split(" - ", 1)
+                        p1, p2 = parts[0].strip(), parts[1].strip()
+                        artist, title = (p2, p1) if station['fmt'] == "title-artist" else (p1, p2)
+                        
+                        new_scraped_data.append({
+                            "artist": artist, "title": title, "badge": station['badge'],
+                            "raw": f"{artist} - {title}"
+                        })
+                        count += 1
+            time.sleep(random.uniform(0.3, 0.7))
+        except: pass
+    print(f"✅ ({count})")
+
+# --- 3. MERGE & DETECT NEW SONGS ---
+print("\n⚙️ Processing New Plays...")
+new_songs_dict = {} # Now using a dict to store the badges for new songs!
+updated_count = 0
+today = datetime.date.today().isoformat()
+
+for item in new_scraped_data:
+    key = normalize_key(item['artist'], item['title'])
+    
+    if key in library:
+        # UPDATE EXISTING
+        library[key]['plays'] += 1
+        library[key]['last_seen'] = today
+        if item['badge'] not in library[key].get('source_badge', ''):
+            library[key]['source_badge'] = library[key].get('source_badge', '') + " " + item['badge']
+        updated_count += 1
+    else:
+        # MARK AS NEW & SAVE THE BADGE
+        raw_name = item['raw']
+        if raw_name not in new_songs_dict:
+            new_songs_dict[raw_name] = item['badge']
+        else:
+            # If song played on BOTH stations, combine badges!
+            if item['badge'] not in new_songs_dict[raw_name]:
+                new_songs_dict[raw_name] += " " + item['badge']
+
+# --- 4. EXPORT ---
+print("\n📊 WEEKLY REPORT:")
+print(f"   • Total Unique Songs in Library: {len(library)}")
+print(f"   • Existing Songs Played Again: {updated_count} times.")
+print(f"   • Brand New Songs Found: {len(new_songs_dict)}")
+
+with open(UPDATED_LIBRARY_FILENAME, "w", encoding="utf-8") as f:
+    json.dump(library, f, indent=4)
+
+with open(NEW_SONGS_FILENAME, "w", encoding="utf-8") as f:
+    # Write the song AND its country badge separated by a pipe '|'
+    for raw_name in sorted(new_songs_dict.keys()):
+        f.write(f"{raw_name} | {new_songs_dict[raw_name]}\n")
+
+print(f"\n⬇️ DOWNLOAD THESE 2 FILES:")
+print(f"1. {UPDATED_LIBRARY_FILENAME} (Keep this safe!)")
+print(f"2. {NEW_SONGS_FILENAME} (Open this, fix names, don't delete the | flags!)")
+files.download(UPDATED_LIBRARY_FILENAME)
+files.download(NEW_SONGS_FILENAME)
